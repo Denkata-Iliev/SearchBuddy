@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<form   asp-action="Search"
+        method="post"
+        enctype="multipart/form-data"
+        class="d-flex flex-column justify-content-center align-items-center gap-3"
+        id="searchForm"
+>
+    <input type="file"
+        name="formFile"
+        required
+        class="form-control w-75"
+        capture="environment"
+        accept="image/jpg,
+            image/jpeg,
+            image/png,
+            image/bmp, 
+            image/gif,
+            image/jfif,
+            image/webp,
+            image/ico" />
+
+    <button type="submit" class="btn btn-primary w-50">Search</button>
+</form>
