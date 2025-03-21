@@ -10,9 +10,9 @@ namespace ImageBasedSearch.Services
 	{
 		private readonly MLContext _mlContext;
 
-		public OnnxModelScorer(MLContext mlContext)
+		public OnnxModelScorer()
 		{
-			_mlContext = mlContext;
+			_mlContext = new();
 		}
 		
 		public float[][] GetAllImageFeatures(List<ImageInput> imageInputs)
@@ -34,8 +34,6 @@ namespace ImageBasedSearch.Services
 			]);
 
 			var normalizedImageFeatures = GetNormalizedImageFeatures(data);
-
-			//var normalizedFeatures = featurizedImageColumnsPerRow.Select(v => L2Normalize(NormalizeVector(v))).ToArray();
 
 			return normalizedImageFeatures[0];
 		}
@@ -97,104 +95,5 @@ namespace ImageBasedSearch.Services
 
 			return pipeline;
 		}
-
-		/*public float[] GetImageEmbedding(string imagePath)
-		{
-			//var data = _mlContext.Data.LoadFromEnumerable(new List<ImageInput>());
-
-			//var testPipeline = _mlContext.Transforms.LoadImages(Constants.OutputColumn, @"wwwroot/images", Constants.InputColumn)
-			//	.Append(_mlContext.Transforms.ResizeImages(Constants.OutputColumn, Constants.ImageWidth, Constants.ImageHeight, Constants.InputColumn))
-			//	.Append(_mlContext.Transforms.ExtractPixels(Constants.OutputColumn, Constants.InputColumn))
-			//	.Append(_mlContext.Transforms.ApplyOnnxModel(modelFile: _modelLocation));
-
-			var data = _mlContext.Data.LoadFromEnumerable([new ImageInput { ImagePath = imagePath }]);
-
-			var testPipeline = _mlContext.Transforms.LoadImages(
-				outputColumnName: Constants.InputColumn, // Must match ONNX input column
-				imageFolder: string.Empty, // Use empty since full path is provided
-				inputColumnName: Constants.InputColumn
-			)
-			.Append(_mlContext.Transforms.ResizeImages(
-					outputColumnName: Constants.InputColumn, // ONNX expects input as "input"
-					imageWidth: Constants.ImageWidth,
-					imageHeight: Constants.ImageHeight
-				)
-			)
-			//.Append(_mlContext.Transforms.ConvertToGrayscale(
-			//		outputColumnName: Constants.InputColumn
-			//	)
-			//)
-			.Append(_mlContext.Transforms.ExtractPixels(
-					outputColumnName: Constants.InputColumn,
-					scaleImage: 1.0f / 255.0f, // Normalize pixel values to [0,1]
-					interleavePixelColors: true // Ensure correct channel order (RGB)
-				)
-			) // Extracts pixel values as floats
-			.Append(_mlContext.Transforms.ApplyOnnxModel(
-					modelFile: _modelLocation,
-					outputColumnName: Constants.OutputColumn, // Model's output tensor
-					inputColumnName: Constants.InputColumn
-				)
-			);
-
-			var modelTest = testPipeline.Fit(data);
-			var predictionEngine = _mlContext.Model.CreatePredictionEngine<ImageInput, ImageEmbedding>(modelTest);
-			//var result = predictionEngine.Predict(new ImageInput { ImagePath = Image.FromFile(imagePath) });
-			var result = predictionEngine.Predict(new ImageInput { ImagePath = imagePath });
-
-			//var imageData = _mlContext.Data.CreateEnumerable<ImageInput>(data, false).First();
-			//using (var grayscale = new Bitmap(imageData.ImagePath))
-			//{
-			//	grayscale.Save("grayscaled.png", ImageFormat.Png);
-			//}
-
-			return result.Embedding;
-		}
-
-		public float[][] BatchVectorize(List<string> imagePaths)
-		{
-			var imageInputs = imagePaths.Select(path => new ImageInput { ImagePath = path }).ToList();
-
-			// Load images into IDataView
-			var data = _mlContext.Data.LoadFromEnumerable(imageInputs);
-
-			var testPipeline = _mlContext.Transforms.LoadImages(
-				outputColumnName: Constants.InputColumn, // Must match ONNX input column
-				imageFolder: string.Empty, // Use empty since full path is provided
-				inputColumnName: Constants.InputColumn
-			)
-			.Append(_mlContext.Transforms.ResizeImages(
-					outputColumnName: Constants.InputColumn, // ONNX expects input as "input"
-					imageWidth: Constants.ImageWidth,
-					imageHeight: Constants.ImageHeight
-				)
-			)
-			//.Append(_mlContext.Transforms.ConvertToGrayscale(
-			//		outputColumnName: Constants.InputColumn
-			//	)
-			//)
-			.Append(_mlContext.Transforms.ExtractPixels(
-					outputColumnName: Constants.InputColumn,
-					scaleImage: 1.0f / 255.0f, // Normalize pixel values to [0,1]
-					interleavePixelColors: true // Ensure correct channel order (RGB)
-				)
-			) // Extracts pixel values as floats
-			.Append(_mlContext.Transforms.ApplyOnnxModel(
-					modelFile: _modelLocation,
-					outputColumnName: Constants.OutputColumn, // Model's output tensor
-					inputColumnName: Constants.InputColumn
-				)
-			);
-
-			var modelTest = testPipeline.Fit(data);
-
-			// Transform the data in batch
-			IDataView transformedData = modelTest.Transform(data);
-
-			// Extract embeddings
-			var embeddings = transformedData.GetColumn<float[]>("output").ToArray();
-
-			return embeddings;
-		}*/
 	}
 }

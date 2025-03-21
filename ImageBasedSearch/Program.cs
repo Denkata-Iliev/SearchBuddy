@@ -4,12 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using Microsoft.AspNetCore.Identity;
-using ImageBasedSearch.Models;
+using ImageBasedSearch.Services.Contracts;
+using ImageBasedSearch.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddTransient<IApiKeyService, ApiKeyService>();
+builder.Services.AddTransient<IElasticService, ElasticService>();
+builder.Services.AddTransient<IImageService, ImageService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

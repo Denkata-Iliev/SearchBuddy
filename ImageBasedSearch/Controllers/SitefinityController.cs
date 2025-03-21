@@ -1,5 +1,7 @@
-﻿using ImageBasedSearch.Models;
+﻿using ImageBasedSearch.Database;
+using ImageBasedSearch.Models;
 using ImageBasedSearch.Services;
+using ImageBasedSearch.Services.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,39 +11,18 @@ namespace ImageBasedSearch.Controllers
 	[ApiController]
 	public class SitefinityController : ControllerBase
 	{
-		private readonly ElasticService _elasticService;
-		private readonly ImageService _imageService;
-		private readonly ApiKeyService _apiKeyService;
-		public static List<User> USERS = new();
+		private readonly IElasticService _elasticService;
+		private readonly IImageService _imageService;
 
 		/*
-		TODO - make an actual db and everything
-		TODO - scaffold identity for register and login
 		TODO - make it so that you can revoke and create a new API key
 		TODO - make a page where users can upload pictures and see them.
 				for that, use the same naming convention (the one for index names) for folder names
 		 */
-		public SitefinityController()
+		public SitefinityController(IElasticService elasticService, IImageService imageService)
 		{
-			_elasticService = new();
-			_imageService = new();
-			_apiKeyService = new();
-		}
-
-		[HttpPost("reg")]
-		public async Task<IActionResult> FakeRegister([FromBody] RegisterDto registerDto)
-		{
-			var user = new User
-			{
-				Email = registerDto.Email,
-				ApiKey = _apiKeyService.GenerateApiKey()
-			};
-
-			USERS.Add(user);
-
-			await _elasticService.InitIndex(user.IndexName);
-
-			return Ok();
+			_elasticService = elasticService;
+			_imageService = imageService;
 		}
 
 		[HttpPost("upload")]
@@ -61,11 +42,5 @@ namespace ImageBasedSearch.Controllers
 
 			return Ok();
 		}
-	}
-
-	public class RegisterDto
-	{
-		public string Email { get; set; } = string.Empty;
-		public string Password { get; set; } = string.Empty;
 	}
 }

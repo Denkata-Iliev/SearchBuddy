@@ -1,16 +1,17 @@
 ﻿using ImageBasedSearch.Models;
+using ImageBasedSearch.Services.Contracts;
 using Microsoft.ML;
 using NuGet.Packaging;
 
 namespace ImageBasedSearch.Services
 {
-	public class ImageService
+	public class ImageService : IImageService
 	{
 		private readonly OnnxModelScorer _scorer;
 
 		public ImageService()
 		{
-			_scorer = new OnnxModelScorer(new MLContext());
+			_scorer = new OnnxModelScorer();
 		}
 
 		public async Task<string> DownloadImageFromUrl(string url)

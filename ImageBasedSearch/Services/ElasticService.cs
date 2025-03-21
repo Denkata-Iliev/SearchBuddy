@@ -2,10 +2,11 @@
 using Elastic.Clients.Elasticsearch.Core.Search;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using ImageBasedSearch.Models;
+using ImageBasedSearch.Services.Contracts;
 
 namespace ImageBasedSearch.Services
 {
-	public class ElasticService
+	public class ElasticService : IElasticService
 	{
 		private readonly ElasticsearchClient _client;
 

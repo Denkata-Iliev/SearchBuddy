@@ -1,8 +1,9 @@
-﻿using System.Security.Cryptography;
+﻿using ImageBasedSearch.Services.Contracts;
+using System.Security.Cryptography;
 
 namespace ImageBasedSearch.Services
 {
-	public class ApiKeyService
+	public class ApiKeyService : IApiKeyService
 	{
 		private const string _prefix = "CT-";
 		private const int _numberOfSecureBytesToGenerate = 64;

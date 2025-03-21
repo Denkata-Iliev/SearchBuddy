@@ -1,4 +1,6 @@
 ﻿using ImageBasedSearch.Controllers;
+using ImageBasedSearch.Database;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace ImageBasedSearch.Middlewares
@@ -12,7 +14,7 @@ namespace ImageBasedSearch.Middlewares
 			_next = next;
 		}
 
-		public async Task InvokeAsync(HttpContext context, IConfiguration config)
+		public async Task InvokeAsync(HttpContext context, SearchBuddyContext dbContext)
 		{
 			var requestPath = context.Request.Path.ToString();
 			if (!requestPath.Contains("/api"))
@@ -29,7 +31,8 @@ namespace ImageBasedSearch.Middlewares
 				return;
 			}
 
-			var apiKeyUser = SitefinityController.USERS.FirstOrDefault(u => u.ApiKey == key, null);
+			var apiKeyHeader = key.ToString();
+			var apiKeyUser = await dbContext.Users.FirstOrDefaultAsync(u => u.ApiKey == apiKeyHeader);
 			if (apiKeyUser is null)
 			{
 				context.Response.StatusCode = (int)HttpStatusCode.Forbidden;

@@ -12,13 +12,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using ImageBasedSearch.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using ImageBasedSearch.Database;
+using ImageBasedSearch.Services.Contracts;
 
 namespace ImageBasedSearch.Areas.Identity.Pages.Account
 {
@@ -30,13 +31,17 @@ namespace ImageBasedSearch.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<User> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IApiKeyService _apiKeyService;
+        private readonly IElasticService _elasticService;
 
         public RegisterModel(
             UserManager<User> userManager,
             IUserStore<User> userStore,
             SignInManager<User> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IApiKeyService apiKeyService,
+            IElasticService elasticService)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +49,8 @@ namespace ImageBasedSearch.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _apiKeyService = apiKeyService;
+            _elasticService = elasticService;
         }
 
         /// <summary>
@@ -117,6 +124,13 @@ namespace ImageBasedSearch.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
+                //create api key on register
+                user.ApiKey = _apiKeyService.GenerateApiKey();
+
+                //init index in ElasticSearch
+                await _elasticService.InitIndex(user.IndexName);
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)

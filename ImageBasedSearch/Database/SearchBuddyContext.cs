@@ -1,5 +1,4 @@
-﻿using ImageBasedSearch.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImageBasedSearch.Database
