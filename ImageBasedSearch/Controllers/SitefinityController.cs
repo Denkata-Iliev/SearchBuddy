@@ -33,7 +33,6 @@ namespace ImageBasedSearch.Controllers
 		{
 			var user = new User
 			{
-				Id = Guid.NewGuid(),
 				Email = registerDto.Email,
 				ApiKey = _apiKeyService.GenerateApiKey()
 			};
