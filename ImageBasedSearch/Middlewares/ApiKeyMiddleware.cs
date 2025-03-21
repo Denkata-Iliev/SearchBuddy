@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using ImageBasedSearch.Controllers;
+using System.Net;
 
 namespace ImageBasedSearch.Middlewares
 {
@@ -13,6 +14,13 @@ namespace ImageBasedSearch.Middlewares
 
 		public async Task InvokeAsync(HttpContext context, IConfiguration config)
 		{
+			var requestPath = context.Request.Path.ToString();
+			if (!requestPath.Contains("/api"))
+			{
+				await _next(context);
+				return;
+			}
+
 			var headers = context.Request.Headers;
 			if (!headers.TryGetValue("x-api-key", out var key))
 			{
@@ -21,13 +29,15 @@ namespace ImageBasedSearch.Middlewares
 				return;
 			}
 
-			var apiKey = config["ApiKey"];
-			if (key != apiKey)
+			var apiKeyUser = SitefinityController.USERS.FirstOrDefault(u => u.ApiKey == key, null);
+			if (apiKeyUser is null)
 			{
 				context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 				await context.Response.WriteAsync("Invalid api key!");
 				return;
 			}
+
+			context.Items.Add("current-user", apiKeyUser);
 
 			await _next(context);
 		}

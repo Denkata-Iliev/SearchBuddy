@@ -1,5 +1,6 @@
 ﻿using ImageBasedSearch.Models;
 using Microsoft.ML;
+using NuGet.Packaging;
 
 namespace ImageBasedSearch.Services
 {
@@ -10,6 +11,22 @@ namespace ImageBasedSearch.Services
 		public ImageService()
 		{
 			_scorer = new OnnxModelScorer(new MLContext());
+		}
+
+		public async Task<string> DownloadImageFromUrl(string url)
+		{
+			var originalExtension = Path.GetExtension(url);
+
+			using var client = new HttpClient();
+			using var stream = await client.GetStreamAsync(url);
+
+			var randomFileName = Path.GetRandomFileName();
+			var fileNameOriginalExtension = Path.ChangeExtension(randomFileName, originalExtension);
+			var fullFilePath = Path.Combine(Constants.ImagesFolder, fileNameOriginalExtension);
+
+			stream.CopyToFile(fullFilePath);
+
+			return fullFilePath;
 		}
 
 		public float[] GetImageVectors(string imagePath)

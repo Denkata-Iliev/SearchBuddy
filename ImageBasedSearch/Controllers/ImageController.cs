@@ -20,11 +20,11 @@ namespace ImageBasedSearch.Controllers
 
 		public async Task<IActionResult> InsertPictures()
 		{
-			await _elasticService.InitIndex();
+			//await _elasticService.InitIndex();
 
 			var imageDocs = _imageService.GetImageDocuments();
 
-			await _elasticService.InsertBulk(imageDocs);
+			//await _elasticService.InsertBulk(imageDocs);
 
 			return Ok();
 		}

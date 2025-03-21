@@ -1,10 +1,7 @@
 ﻿using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.Core.Search;
-using Elastic.Clients.Elasticsearch.Mapping;
-using Elastic.Clients.Elasticsearch.Nodes;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using ImageBasedSearch.Models;
-using System.Collections.Immutable;
 
 namespace ImageBasedSearch.Services
 {
@@ -49,53 +46,40 @@ namespace ImageBasedSearch.Services
 					}
 				)
 			});
-			/*
-			something like 'user_id_album' - index name for each user
-			TODO - each user has to have a separate API key
-			TODO - add UserId or IndexNAme or something to HttpContext and set it in middleware,
-				so you can use it everywhere in the app for every request. if needed, create your own context
-				for more complex stuff. 
-			 
-			 */
+
 			var elements = esResponse.Hits
 				.Where(h => h.Score < 0.8)
 				.Select(h => new ResponseDocument
-					{
-						ImagePath = h.Source?.ImagePath,
-						Score = h.Score,
-						Id = h.Id
-					}
+				{
+					ImagePath = h.Source?.ImagePath,
+					Score = h.Score,
+					Id = h.Id
+				}
 				).ToList();
 
 			return elements;
 		}
 
-		public async Task InitIndex()
+		public async Task InitIndex(string indexName)
 		{
-			var response = await _client.Indices.GetAsync(Constants.MyIndexName);
+			var response = await _client.Indices.GetAsync(indexName);
 
-			if (!response.IsValidResponse)
+			if (response.IsValidResponse)
 			{
-				await CreateIndex();
-			}
-			else
-			{
-				await _client.Indices.DeleteAsync(Constants.MyIndexName);
-				await CreateIndex();
+				return;
 			}
 
-			//var tc = new TestClass();
-			//var res = await client.IndexAsync(tc, s => s.Index(MyIndexName));
+			await CreateIndex(indexName);
 		}
 
-		public async Task InsertBulk(IEnumerable<ImageDocument> imageDocuments)
+		public async Task InsertBulk(IEnumerable<ImageDocument> imageDocuments, string indexName)
 		{
-			await _client.IndexManyAsync(imageDocuments, Constants.MyIndexName);
+			await _client.IndexManyAsync(imageDocuments, indexName);
 		}
 
-		private async Task CreateIndex()
+		private async Task CreateIndex(string indexName)
 		{
-			await _client.Indices.CreateAsync(Constants.MyIndexName, c => c
+			await _client.Indices.CreateAsync(indexName, c => c
 				.Mappings(m => m
 					.Properties<IndexMapping>(p => p
 						.DenseVector(nameof(IndexMapping.Embeddings), v => v.Dims(512))

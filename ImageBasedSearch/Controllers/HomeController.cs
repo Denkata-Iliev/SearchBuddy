@@ -35,7 +35,7 @@ public class HomeController : Controller
 		stream.CopyToFile(fullFilePath);
 
 		var imageDoc = _imageService.GetImageDocument(fullFilePath);
-		await _elasticService.InsertBulk([imageDoc]);
+		//await _elasticService.InsertBulk([imageDoc]);
 
 		return Ok(fullFilePath);
 	}
