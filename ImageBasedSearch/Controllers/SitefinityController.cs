@@ -15,7 +15,6 @@ namespace ImageBasedSearch.Controllers
 		private readonly IImageService _imageService;
 
 		/*
-		TODO - make it so that you can revoke and create a new API key
 		TODO - make a page where users can upload pictures and see them.
 				for that, use the same naming convention (the one for index names) for folder names
 		 */
