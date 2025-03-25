@@ -44,15 +44,14 @@ namespace ImageBasedSearch.Services
 			};
 		}
 
-		public List<ImageDocument> GetImageDocuments()
+		public List<ImageDocument> GetImageDocuments(IEnumerable<string> imagePaths)
 		{
 			List<ImageDocument> imageDocs = [];
-			var images = Directory.GetFiles(Constants.ImagesFolder, string.Empty, SearchOption.AllDirectories);
-			var imageInputs = images.Select(p => new ImageInput { ImagePath = p }).ToList();
+			var imageInputs = imagePaths.Select(p => new ImageInput { ImagePath = p }).ToList();
 
 			float[][] embeddings = _scorer.GetAllImageFeatures(imageInputs);
 
-			foreach (var (path, embed) in images.Zip(embeddings))
+			foreach (var (path, embed) in imagePaths.Zip(embeddings))
 			{
 				imageDocs.Add(new ImageDocument
 				{

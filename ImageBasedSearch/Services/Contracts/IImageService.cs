@@ -10,6 +10,6 @@ namespace ImageBasedSearch.Services.Contracts
 
 		ImageDocument GetImageDocument(string imagePath);
 
-		List<ImageDocument> GetImageDocuments();
+		List<ImageDocument> GetImageDocuments(IEnumerable<string> imagePaths);
 	}
 }

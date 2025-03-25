@@ -22,7 +22,7 @@ namespace ImageBasedSearch.Controllers
 		{
 			//await _elasticService.InitIndex();
 
-			var imageDocs = _imageService.GetImageDocuments();
+			//var imageDocs = _imageService.GetImageDocuments();
 
 			//await _elasticService.InsertBulk(imageDocs);
 
