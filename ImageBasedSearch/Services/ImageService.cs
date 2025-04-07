@@ -1,6 +1,5 @@
 ﻿using ImageBasedSearch.Models;
 using ImageBasedSearch.Services.Contracts;
-using Microsoft.ML;
 using NuGet.Packaging;
 
 namespace ImageBasedSearch.Services
@@ -14,8 +13,13 @@ namespace ImageBasedSearch.Services
 			_scorer = new OnnxModelScorer();
 		}
 
-		public async Task<string> DownloadImageFromUrl(string url)
+		public async Task<string?> DownloadImageFromUrl(string url, string userAlbumFolder)
 		{
+			if (string.IsNullOrEmpty(url))
+			{
+				return null;
+			}
+
 			var originalExtension = Path.GetExtension(url);
 
 			using var client = new HttpClient();
@@ -23,11 +27,11 @@ namespace ImageBasedSearch.Services
 
 			var randomFileName = Path.GetRandomFileName();
 			var fileNameOriginalExtension = Path.ChangeExtension(randomFileName, originalExtension);
-			var fullFilePath = Path.Combine(Constants.ImagesFolder, fileNameOriginalExtension);
+			var filePath = Path.Combine(Constants.ImagesFolder, userAlbumFolder, fileNameOriginalExtension);
 
-			stream.CopyToFile(fullFilePath);
+			stream.CopyToFile(filePath);
 
-			return fullFilePath;
+			return filePath;
 		}
 
 		public float[] GetImageVectors(string imagePath)
@@ -61,6 +65,30 @@ namespace ImageBasedSearch.Services
 			}
 
 			return imageDocs;
+		}
+
+		public async Task<string?> GetImagePathFromFormFile(IFormFile formFile, string? userAlbumFolder = null)
+		{
+			if (formFile.Length < 0 || formFile is null)
+			{
+				return null;
+			}
+
+			var fileExtension = Path.GetExtension(formFile.FileName);
+			var fileName = Path.ChangeExtension(Path.GetRandomFileName(), fileExtension);
+
+			var filePath = Path.Combine(
+				Constants.ImagesFolder,
+				userAlbumFolder is null ? string.Empty : userAlbumFolder,
+				fileName
+			);
+
+			using (var stream = File.Create(filePath))
+			{
+				await formFile.CopyToAsync(stream);
+			}
+
+			return filePath;
 		}
 	}
 }

@@ -6,6 +6,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using ImageBasedSearch.Database;
+using ImageBasedSearch.Services.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -18,22 +19,25 @@ namespace ImageBasedSearch.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<DeletePersonalDataModel> _logger;
+        private readonly IElasticService _elasticService;
 
-        public DeletePersonalDataModel(
-            UserManager<User> userManager,
-            SignInManager<User> signInManager,
-            ILogger<DeletePersonalDataModel> logger)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _logger = logger;
-        }
+		public DeletePersonalDataModel(
+			UserManager<User> userManager,
+			SignInManager<User> signInManager,
+			ILogger<DeletePersonalDataModel> logger,
+			IElasticService elasticService)
+		{
+			_userManager = userManager;
+			_signInManager = signInManager;
+			_logger = logger;
+			_elasticService = elasticService;
+		}
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        [BindProperty]
+		/// <summary>
+		///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+		///     directly from your code. This API may change or be removed in future releases.
+		/// </summary>
+		[BindProperty]
         public InputModel Input { get; set; }
 
         /// <summary>
@@ -93,6 +97,20 @@ namespace ImageBasedSearch.Areas.Identity.Pages.Account.Manage
             {
                 throw new InvalidOperationException($"Unexpected error occurred deleting user.");
             }
+
+            // delete user index after user is deleted
+            await _elasticService.DeleteIndex(user.IndexName);
+
+            // delete all files in his folder
+            var userAlbumFolder = Path.Combine(Constants.ImagesFolder, user.IndexName);
+            var filesInUserFolder = Directory.EnumerateFiles(userAlbumFolder);
+            foreach (var file in filesInUserFolder)
+            {
+                System.IO.File.Delete(file);
+            }
+
+            // delete folder after it's empty
+            Directory.Delete(userAlbumFolder);
 
             await _signInManager.SignOutAsync();
 

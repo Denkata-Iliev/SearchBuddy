@@ -131,6 +131,9 @@ namespace ImageBasedSearch.Areas.Identity.Pages.Account
                 //init index in ElasticSearch
                 await _elasticService.InitIndex(user.IndexName);
 
+                //create directory for user images
+                Directory.CreateDirectory(Path.Combine(Constants.ImagesFolder, user.IndexName));
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)

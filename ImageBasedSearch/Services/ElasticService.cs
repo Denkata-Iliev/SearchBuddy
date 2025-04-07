@@ -15,38 +15,43 @@ namespace ImageBasedSearch.Services
 			_client = GetElasticClient();
 		}
 
-		public async Task<List<ResponseDocument>> SearchSimilar(float[] queryVector)
+		public async Task<List<ResponseDocument>> SearchSimilar(float[] queryVector, string indexName)
 		{
-			var esResponse = await _client.SearchAsync<ResponseDocument>(new SearchRequest
-			{
-				Sort = [
-					SortOptions.Score(
-						new ScoreSort
+			// if indexName is empty or null, we're trying to
+			// search through all indices available (i.e. all albums in the site)
+			var allIndices = string.IsNullOrEmpty(indexName) ? Indices.All : null;
+			var esResponse = await _client.SearchAsync<ResponseDocument>(
+				new SearchRequest(allIndices is not null ? allIndices : indexName)
+				{
+					Sort = [
+						SortOptions.Score(
+							new ScoreSort
+							{
+								Order = SortOrder.Asc
+							}
+						)
+					],
+					Size = 50,
+					Query = Query.ScriptScore(new ScriptScoreQuery
+					{
+						Query = Query.MatchAll(new MatchAllQuery()),
+						Script = new Script
 						{
-							Order = SortOrder.Asc
+							Source = "l2norm(params.query_vector, 'Embeddings')",
+							Params = new Dictionary<string, object>
+							{
+								{ "query_vector", queryVector }
+							}
+						}
+					}),
+					Source = new SourceConfig(
+						new SourceFilter
+						{
+							Excludes = Field.FromString(nameof(ImageDocument.Embeddings))
 						}
 					)
-				],
-				Size = 50,
-				Query = Query.ScriptScore(new ScriptScoreQuery
-				{
-					Query = Query.MatchAll(new MatchAllQuery()),
-					Script = new Script
-					{
-						Source = "l2norm(params.query_vector, 'Embeddings')",
-						Params = new Dictionary<string, object>
-						{
-							{ "query_vector", queryVector }
-						}
-					}
-				}),
-				Source = new SourceConfig(
-					new SourceFilter
-					{
-						Excludes = Field.FromString(nameof(ImageDocument.Embeddings))
-					}
-				)
-			});
+				}
+			);
 
 			var elements = esResponse.Hits
 				.Where(h => h.Score < 0.8)
@@ -76,6 +81,11 @@ namespace ImageBasedSearch.Services
 		public async Task InsertBulk(IEnumerable<ImageDocument> imageDocuments, string indexName)
 		{
 			await _client.IndexManyAsync(imageDocuments, indexName);
+		}
+
+		public async Task DeleteIndex(string indexName)
+		{
+			await _client.Indices.DeleteAsync(indexName);
 		}
 
 		private async Task CreateIndex(string indexName)

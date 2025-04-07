@@ -3,17 +3,21 @@
     ViewData["Title"] = "Album";
 }
 
-<form asp-action="Album"
-      method="post"
-      enctype="multipart/form-data"
-      class="d-flex flex-column justify-content-center align-items-center gap-3"
-      id="albumForm">
-    <input type="file"
-           name="images"
-           required
-           multiple
-           class="form-control w-75"
-           accept="image/jpg,
+<div class="d-flex gap-5">
+    <form asp-action="Album"
+          method="post"
+          enctype="multipart/form-data"
+          class="d-flex flex-column justify-content-center align-items-center gap-3 w-100"
+          id="albumForm"
+    >
+        <label class="form-label" for="upload">Upload to your album:</label>
+        <input type="file"
+               name="images"
+               id="upload"
+               required
+               multiple
+               class="form-control w-100"
+               accept="image/jpg,
             image/jpeg,
             image/png,
             image/bmp,
@@ -22,8 +26,33 @@
             image/webp,
             image/ico" />
 
-    <button type="submit" class="btn btn-primary w-50">Upload</button>
-</form>
+        <button type="submit" class="btn btn-primary w-75">Upload</button>
+    </form>
+
+    <form asp-action="Search"
+          method="post"
+          enctype="multipart/form-data"
+          class="d-flex flex-column justify-content-center align-items-center gap-3 w-100"
+          id="searchAlbumForm"
+    >
+        <label class="form-label" for="search">Search in your album:</label>
+        <input type="file"
+               name="searchImage"
+               id="search"
+               required
+               class="form-control w-100"
+               accept="image/jpg,
+            image/jpeg,
+            image/png,
+            image/bmp,
+            image/gif,
+            image/jfif,
+            image/webp,
+            image/ico" />
+
+        <button type="submit" class="btn btn-primary w-75">Search</button>
+    </form>
+</div>
 
 <div class="container mt-4">
     <h2 class="text-center mb-4">Image Gallery</h2>

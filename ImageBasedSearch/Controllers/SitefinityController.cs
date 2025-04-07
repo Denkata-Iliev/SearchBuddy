@@ -14,10 +14,6 @@ namespace ImageBasedSearch.Controllers
 		private readonly IElasticService _elasticService;
 		private readonly IImageService _imageService;
 
-		/*
-		TODO - make a page where users can upload pictures and see them.
-				for that, use the same naming convention (the one for index names) for folder names
-		 */
 		public SitefinityController(IElasticService elasticService, IImageService imageService)
 		{
 			_elasticService = elasticService;
@@ -33,7 +29,11 @@ namespace ImageBasedSearch.Controllers
 				return BadRequest();
 			}
 
-			var filePath = await _imageService.DownloadImageFromUrl(sitefinityResponse.Item.Url);
+			var filePath = await _imageService.DownloadImageFromUrl(sitefinityResponse.Item.Url, currentUser.IndexName);
+			if (filePath is null)
+			{
+				return BadRequest();
+			}
 
 			var imageDoc = _imageService.GetImageDocument(filePath);
 

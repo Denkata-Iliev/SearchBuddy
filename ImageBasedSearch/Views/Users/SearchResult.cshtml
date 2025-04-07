@@ -1,0 +1,45 @@
+﻿@model IEnumerable<ImageBasedSearch.Models.ResponseDocument>
+
+@{
+    ViewData["Title"] = "SearchResult";
+}
+
+<h1>SearchResult</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Image
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Score)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                <img src="~/@item.ImageName" alt="Similar Picture" width="250" height="250" />
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Score)
+            </td>
+            <td>
+                <form asp-action="SearchWithPath" method="get">
+                    <input hidden name="filePath" value="@item.ImagePath" />
+                    <button type="submit" class="btn btn-primary">Search Similar</button>
+                </form>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
