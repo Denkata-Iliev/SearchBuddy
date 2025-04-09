@@ -4,10 +4,10 @@ namespace ImageBasedSearch.Models
 {
 	public class ImageDocument
 	{
-		[JsonPropertyName("Embeddings")]
+		[JsonPropertyName(nameof(Embeddings))]
 		public float[] Embeddings { get; set; } = new float[512];
 
-		[JsonPropertyName("ImagePath")]
+		[JsonPropertyName(nameof(ImagePath))]
 		public string ImagePath { get; set; } = string.Empty;
 	}
 }

@@ -1,0 +1,78 @@
+﻿@page
+@model ImageBasedSearch.Areas.Identity.Pages.Account.Manage.ApiKeyModel
+
+@{
+    ViewData["Title"] = "API Key";
+    ViewData["ActivePage"] = ManageNavPages.ApiKey;
+}
+
+<style>
+    .notification-box {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 15px 20px;
+        border-radius: 10px;
+        color: white;
+        opacity: 0;
+        visibility: hidden;
+        z-index: 1050;
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .notification-box.show {
+        opacity: 1;
+        visibility: visible;
+    }
+</style>
+
+<h3>@ViewData["Title"]</h3>
+
+<partial name="_StatusMessage" for="StatusMessage" />
+<div class="row">
+    <div class="col-md-6">
+        <form id="change-password-form" method="post">
+            <div class="input-group mb-3">
+                <input type="password" class="form-control" id="api-key-input" value="@Model.ApiKey" readonly style="background-color: white">
+                <button class="btn btn-outline-primary" type="button" id="show-btn">Show</button>
+                <button class="btn btn-outline-primary" type="button" id="copy-btn">Copy</button>
+            </div>
+
+            <button type="submit" class="w-100 btn btn-lg btn-danger">Revoke Key</button>
+        </form>
+    </div>
+</div>
+
+<!-- Notification Box -->
+<div id="notification" class="notification-box bg-success">Copied to clipboard</div>
+
+@section Scripts {
+    <script defer>
+        const apiKey = document.getElementById('api-key-input');
+        const showBtn = document.getElementById('show-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const notificationBox = document.getElementById('notification');
+
+        let show = false;
+        showBtn.onclick = () => {
+            if (!show) {
+                apiKey.type = 'text';
+            } else {
+                apiKey.type = 'password';
+            }
+            showBtn.textContent = !show ? 'Hide' : 'Show';
+
+            show = !show;
+        }
+
+        copyBtn.onclick = async () => {
+            await navigator.clipboard
+            .writeText(apiKey.value);
+            notificationBox.classList.add('show');
+                setTimeout(() => {
+                    notificationBox.classList.remove('show');
+                }, 1500);
+        }
+    </script>
+}
